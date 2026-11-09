@@ -1,0 +1,8 @@
+needs saving:
+admin role
+reviewer role
+admin channel (join logs)
+form channel (button to open modal)
+form eval channel (channel for staff to review applications)
+link application to discord user
+link mc with discord (to have allowlist)
