@@ -11,6 +11,7 @@ import { ApplicationCommandOptionType, ModalBuilder, LabelBuilder, TextDisplayBu
 } from "discord.js";
 import { ButtonComponent, Discord, Slash, SlashOption, type SlashOptionResult} from "discordx";
 import { createServer, getServerData } from "../db.js";
+import { replyEphemeral } from "./utils.js";
 
 @Discord()
 export class Example {
@@ -21,7 +22,7 @@ export class Example {
 
   @Slash({ description: "pong" })
   async pong(interaction: CommandInteraction): Promise<void> {
-    await interaction.reply("meu pau que faz boing");
+    await replyEphemeral(interaction, "meu pau que faz boing");
   }
 
   @Slash({description: "Configuração do bot"})
@@ -37,7 +38,7 @@ export class Example {
     interaction: CommandInteraction
   ) {
     if (interaction.guildId === null) {
-      await interaction.reply("Esse comando só pode ser executado em um servidor.")
+      await replyEphemeral(interaction, "Esse comando só pode ser executado em um servidor.")
       return;
     }
     createServer({serverId: interaction.guildId, adminRole: adminRole.id, reviewerRole: reviewerRole.id, logChannel: adminChannel.id, formEvalChannel: reviewChannel.id})
@@ -46,7 +47,7 @@ export class Example {
   @Slash({description:"ai caraio"})
   async get(interaction: CommandInteraction) {
     console.log(await getServerData(interaction.guildId!))
-    interaction.reply("coco")
+    replyEphemeral(interaction, "coco")
   }
 
   @Slash({ description: "Criar formulario de personagem" })
@@ -61,12 +62,12 @@ export class Example {
     interaction: CommandInteraction
   ): Promise<void> {
     let formChannel = channel || interaction.channel
-    if (formChannel === undefined || formChannel === null || !channel.isSendable()) {
-      await interaction.reply("Canal inválido");
+    if (formChannel === undefined || formChannel === null || !formChannel.isSendable()) {
+      await replyEphemeral(interaction, "Canal inválido");
       return;
     }
     if (interaction.guildId === null) {
-      await interaction.reply("Esse comando só pode ser executado em um servidor.")
+      await replyEphemeral(interaction, "Esse comando só pode ser executado em um servidor.")
       return;
     }
     const button = new ButtonBuilder()
@@ -74,10 +75,10 @@ export class Example {
       .setStyle(ButtonStyle.Primary)
       .setCustomId("form-register")
     const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(button)
-    await channel.send({
+    await formChannel.send({
       components: [row]
     })
-    await interaction.reply("Formulario de personagem criado!");
+    await replyEphemeral(interaction, "Formulario de personagem criado!");
   }
 }
 

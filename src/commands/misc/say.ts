@@ -1,13 +1,15 @@
-import { ApplicationCommandOptionType, CommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ApplicationCommandOptionType, ChannelSelectMenuBuilder, ChannelType, CommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, ModalSubmitInteraction, RepliableInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Discord, ModalComponent, Slash, SlashOption, SlashOptionResult } from "discordx";
+import { replyEphemeral } from "../utils.js";
 
 @Discord()
 export class Say {
     @ModalComponent()
     async sayModal(interaction: ModalSubmitInteraction) {
         const message = interaction.fields.getTextInputValue("message")
-        const channel = interaction.fields.getSelectedChannels("channel")
-        //channel?.first()
+        const channel = interaction.fields.getSelectedChannels("channel", true, [ChannelType.GuildText])?.first()
+        await channel?.send(message)
+        await replyEphemeral(interaction, "Mensagem falada com sucesso.")
     }
 
     @Slash({description: "Faça o bot dizer algo!"})
@@ -23,12 +25,21 @@ export class Say {
             .setTitle("Mensagem")
             const msg = new TextInputBuilder()
             .setCustomId("message")
+            .setRequired(true)
             .setStyle(TextInputStyle.Paragraph)
             const msgLabel = new LabelBuilder()
             .setLabel("Mensagem")
             .setTextInputComponent(msg)
-            
-            modal.addLabelComponents(msgLabel)
+            const channel = new ChannelSelectMenuBuilder()
+            .setCustomId("channel")
+            .setMaxValues(1)
+            .setMinValues(1)
+            .setRequired(true)
+            .setChannelTypes(ChannelType.GuildText)
+            const channelLabel = new LabelBuilder()
+            .setLabel("Canal")
+            .setChannelSelectMenuComponent(channel)
+            modal.addLabelComponents(msgLabel, channelLabel)
             await interaction.showModal(modal)
             return;
         }
@@ -37,7 +48,7 @@ export class Say {
             await interaction.reply("Canal inválido");
             return;
         }
-        sayChannel.send(message)
-        await interaction.reply({content: "Mensagem falada com sucesso.", flags: MessageFlags.Ephemeral})
+        await sayChannel.send(message)
+        await replyEphemeral(interaction, "Mensagem falada com sucesso.")
     }
 }
