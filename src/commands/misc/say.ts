@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType, ChannelSelectMenuBuilder, ChannelType, CommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, ModalSubmitInteraction, RepliableInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
-import { Discord, ModalComponent, Slash, SlashOption, SlashOptionResult } from "discordx";
-import { replyEphemeral } from "../utils.js";
+import { ApplicationCommandOptionType, ChannelSelectMenuBuilder, ChannelType, CommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
+import { Discord, Guard, ModalComponent, Slash, SlashOption, SlashOptionResult } from "discordx";
+import { IsAdmin, logAction, replyEphemeral } from "../utils.js";
 
 @Discord()
 export class Say {
@@ -13,12 +13,17 @@ export class Say {
     }
 
     @Slash({description: "Faça o bot dizer algo!"})
+    @Guard(IsAdmin)
     async say(
         @SlashOption({ name: "mensagem", description: "Mensagem para o bot dizer", required: false, type: ApplicationCommandOptionType.String})
         message: SlashOptionResult[ApplicationCommandOptionType.String], 
         @SlashOption({ name: "canal", description: "Canal para dizer essa mensagem", required: false, type: ApplicationCommandOptionType.Channel})
         channel: SlashOptionResult[ApplicationCommandOptionType.Channel],
         interaction: CommandInteraction) {
+        if (interaction.guild === null) {
+            await replyEphemeral(interaction, "Esse comando deve ser executado em um servidor.")
+            return;
+        }
         if (message === undefined || message === null) {
             const modal = new ModalBuilder()
             .setCustomId("sayModal")
@@ -45,10 +50,11 @@ export class Say {
         }
         let sayChannel = channel || interaction.channel
         if (sayChannel === undefined || sayChannel === null || !sayChannel.isSendable()) {
-            await interaction.reply("Canal inválido");
+            await replyEphemeral(interaction, "Canal inválido");
             return;
         }
         await sayChannel.send(message)
         await replyEphemeral(interaction, "Mensagem falada com sucesso.")
+        await logAction(interaction.guild, "Say utilizado", `Mensagem falada: ${message}\nCanal: <#${sayChannel.id}>`, interaction.user)
     }
 }
