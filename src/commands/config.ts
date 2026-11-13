@@ -1,17 +1,15 @@
-import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, CommandInteraction, InteractionCallback, PermissionsBitField } from "discord.js";
 import {
 	Discord,
-	Guard,
 	Slash,
 	SlashOption,
 	SlashOptionResult,
 } from "discordx";
-import { IsAdmin, replyEphemeral } from "./utils.js";
+import { replyEphemeral } from "./utils.js";
 import { createServer } from "../db.js";
 
 @Discord()
 export class Config {
-	// to-do: make only admins use this
 	@Slash({ description: "Configuração do bot" })
 	async config(
 		@SlashOption({
@@ -44,14 +42,19 @@ export class Config {
 		reviewChannel: SlashOptionResult[ApplicationCommandOptionType.Channel],
 		interaction: CommandInteraction,
 	) {
-		if (interaction.guildId === null) {
+		if (interaction.guildId === null || interaction.member === null) {
 			await replyEphemeral(
 				interaction,
 				"Esse comando só pode ser executado em um servidor.",
 			);
 			return;
 		}
-
+        const perms = interaction.member.permissions
+        if (typeof perms === "string") return;
+        if (!perms.has(PermissionsBitField.Flags.Administrator) || !perms.has(PermissionsBitField.Flags.ManageGuild)) {
+            await replyEphemeral(interaction, "Você não tem permissão para executar esse comando.")
+            return;
+        }
 		await createServer({
 			serverId: interaction.guildId,
 			adminRole: adminRole.id,

@@ -36,8 +36,45 @@ import { getServerData } from "../db.js";
 @Discord()
 export class Form {
 	@ButtonComponent({ id: "form-register" })
-	async buttonHandler(interaction: ButtonInteraction) {
+	async formButton(interaction: ButtonInteraction) {
 		await showModal(interaction);
+	}
+
+	@ButtonComponent({ id: "approve-form"})
+	async approve(interaction: ButtonInteraction) {
+
+	}
+
+	@ButtonComponent({ id: "deny-form" })
+	async deny(interaction: ButtonInteraction) {
+		const modal = new ModalBuilder()
+		.setTitle("Motivo")
+		.setCustomId("formDeny")
+		const reason = new TextInputBuilder()
+		.setCustomId("reason")
+		.setRequired(true)
+		.setStyle(TextInputStyle.Paragraph)
+		const label = new LabelBuilder()
+		.setLabel("Qual foi o motivo de recuso?")
+		.setTextInputComponent(reason)
+		modal.addLabelComponents(label);
+		interaction.showModal(modal)
+	}
+
+	@ModalComponent()
+	async formDeny(interaction: ModalSubmitInteraction) {
+		if (!interaction.message) {
+			replyEphemeral(interaction, "A mensagem não existe mais (Alguém já respondeu?)")
+			return
+		}
+		const user = interaction.message.mentions.members?.first();
+		if (!user) {
+			replyEphemeral(interaction, "Usuário não foi encontrado.")
+			return
+		}
+		await user.send(`Seu formulário foi recusado pelo motivo: ${interaction.fields.getTextInputValue("reason")}`)
+		await replyEphemeral(interaction, "Usuário foi notificado.")
+		interaction.message.delete()
 	}
 
 	@ModalComponent()
@@ -67,9 +104,21 @@ export class Form {
 					);
 					section.addTextDisplayComponents(title, descComponent);
 					section.setThumbnailAccessory(thumbnail);
+					const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+					const allowBtn = new ButtonBuilder()
+					.setCustomId("approve-form")
+					.setStyle(ButtonStyle.Success)
+					.setEmoji("✅")
+					.setLabel("Aprovar")
+					const denyBtn = new ButtonBuilder()
+					.setCustomId("deny-form")
+					.setStyle(ButtonStyle.Danger)
+					.setEmoji("❌")
+					.setLabel("Reprovar")
+					row.addComponents(allowBtn, denyBtn)
 					channel.send({
 						flags: MessageFlags.IsComponentsV2,
-						components: [section],
+						components: [section, row],
 					});
 					replyEphemeral(
 						interaction,
