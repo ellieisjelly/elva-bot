@@ -60,6 +60,15 @@ export async function getServerData(guild: Guild) {
 }
 
 export async function createServer(serverObj: {serverId: string, adminRole: string, reviewerRole: string, logChannel: string, formEvalChannel: string}) {
+    const data = await Server.findOne().where("serverId").equals(serverObj.serverId)
+    if (data) {
+        data.serverId = serverObj.serverId
+        data.adminRole = serverObj.adminRole
+        data.reviewerRole = serverObj.reviewerRole
+        data.logChannel = serverObj.logChannel
+        await data.save()
+        return;
+    }
     const boob = new Server({serverId: serverObj.serverId, adminRole: serverObj.adminRole, reviewerRole: serverObj.reviewerRole, logChannel: serverObj.logChannel, formEvalChannel: serverObj.formEvalChannel, mcUsers: []})
     await boob.save()
 }

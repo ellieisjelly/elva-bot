@@ -5,7 +5,7 @@ import {
 	SlashOption,
 	SlashOptionResult,
 } from "discordx";
-import { replyEphemeral } from "./utils.js";
+import { replyEphemeral } from "../utils.js";
 import { createServer } from "../db.js";
 
 @Discord()
@@ -27,12 +27,12 @@ export class Config {
 		})
 		reviewerRole: SlashOptionResult[ApplicationCommandOptionType.Role],
 		@SlashOption({
-			name: "canal_admin",
+			name: "canal_logs",
 			description: "Canal para log de ações admin",
 			required: true,
 			type: ApplicationCommandOptionType.Channel,
 		})
-		adminChannel: SlashOptionResult[ApplicationCommandOptionType.Channel],
+		logChannel: SlashOptionResult[ApplicationCommandOptionType.Channel],
 		@SlashOption({
 			name: "canal_review_formulario",
 			description: "Canal para review de formularios",
@@ -59,7 +59,7 @@ export class Config {
 			serverId: interaction.guildId,
 			adminRole: adminRole.id,
 			reviewerRole: reviewerRole.id,
-			logChannel: adminChannel.id,
+			logChannel: logChannel.id,
 			formEvalChannel: reviewChannel.id,
 		});
 		await replyEphemeral(interaction, "Configuração efetuada.");

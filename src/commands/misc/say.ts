@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ChannelSelectMenuBuilder, ChannelType, CommandInteraction, LabelBuilder, MessageFlags, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
 import { Discord, Guard, ModalComponent, Slash, SlashOption, SlashOptionResult } from "discordx";
-import { IsAdmin, logAction, replyEphemeral } from "../utils.js";
+import { IsAdmin, logAction, replyEphemeral } from "../../utils.js";
 
 @Discord()
 export class Say {

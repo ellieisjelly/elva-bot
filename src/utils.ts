@@ -8,7 +8,7 @@ import {
 	ColorResolvable,
 } from "discord.js";
 import { GuardFunction } from "discordx";
-import { getServerData } from "../db.js";
+import { getServerData } from "./db.js";
 
 export function replyEphemeral(interaction: BaseInteraction, message: string) {
 	if (interaction.isRepliable()) {

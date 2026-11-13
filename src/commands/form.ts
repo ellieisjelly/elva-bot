@@ -30,7 +30,7 @@ import {
 	SlashOption,
 	SlashOptionResult,
 } from "discordx";
-import { IsAdmin, replyEphemeral } from "./utils.js";
+import { IsAdmin, replyEphemeral } from "../utils.js";
 import { getServerData } from "../db.js";
 
 @Discord()
